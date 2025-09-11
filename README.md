@@ -250,9 +250,85 @@ MIT License
 
 欢迎提交 Issue 和 Pull Request！
 
+
+
+## 媒体文件处理
+
+### 批量上传图片
+
+```rust
+use cos_rust_sdk::{Config, CosClient, ObjectClient};
+use std::time::Duration;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::new(secret_id, secret_key, region, bucket)
+        .with_timeout(Duration::from_secs(120)); // 增加超时时间
+    
+    let cos_client = CosClient::new(config)?;
+    let object_client = ObjectClient::new(cos_client);
+    
+    // 批量上传图片
+    let images = vec![
+        ("photos/image1.jpg", image1_data),
+        ("photos/image2.png", image2_data),
+        ("photos/image3.webp", image3_data),
+    ];
+    
+    for (key, data) in images {
+        object_client.put_object(key, data, None).await?;
+        println!("上传成功: {}", key);
+    }
+    
+    Ok(())
+}
+```
+
+### 下载并保存图片
+
+```rust
+// 下载图片到本地
+let local_path = "./downloaded_image.jpg";
+object_client.get_object_to_file("photos/image1.jpg", local_path).await?;
+println!("图片已保存到: {}", local_path);
+```
+
+### 支持的文件格式
+
+SDK 支持自动检测以下文件格式的 MIME 类型：
+
+- **图片格式**：JPEG, PNG, GIF, WebP, BMP, TIFF, SVG, ICO, HEIC, HEIF, AVIF, JXL
+- **视频格式**：MP4, AVI, MOV, WMV, FLV, WebM, MKV, M4V, 3GP, 3G2, TS, MTS, M2TS, OGV
+- **音频格式**：MP3, WAV, FLAC, AAC, OGG, WMA, M4A, Opus
+- **文档格式**：PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, RTF
+- **压缩格式**：ZIP, RAR, 7Z, TAR, GZ, BZ2
+- **文本格式**：TXT, HTML, CSS, JS, JSON, XML, CSV, Markdown
+
+详细的媒体文件处理指南请参考：[MEDIA_GUIDE.md](MEDIA_GUIDE.md)
+
+更多示例请查看：
+- [examples/media_upload.rs](examples/media_upload.rs) - 媒体文件上传下载示例（使用模拟数据）
+- [examples/real_file_upload.rs](examples/real_file_upload.rs) - 真实文件上传示例（处理本地文件）
+- [examples/format_support.rs](examples/format_support.rs) - 多格式文件支持演示
+- [examples/quick_start_media.rs](examples/quick_start_media.rs) - 快速开始媒体处理
+
+运行示例：
+```bash
+# 媒体上传示例（使用模拟数据）
+cargo run --example media_upload
+
+# 真实文件上传示例
+cargo run --example real_file_upload -- /path/to/your/file.jpg
+cargo run --example real_file_upload -- ./image.png ./video.mp4
+
+# 格式支持演示
+cargo run --example format_support
+
+# 快速开始
+cargo run --example quick_start_media
+```
+
 ## 相关链接
 
 - [腾讯云 COS 官方文档](https://cloud.tencent.com/document/product/436)
 - [腾讯云 COS API 文档](https://cloud.tencent.com/document/product/436/7751)
-- [Node.js SDK](https://github.com/tencentyun/cos-nodejs-sdk-v5)
-- [Go SDK](https://github.com/tencentyun/cos-go-sdk-v5)

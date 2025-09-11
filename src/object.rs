@@ -76,16 +76,80 @@ impl ObjectClient {
                 .extension()
                 .and_then(|ext| ext.to_str())
                 .and_then(|ext| match ext.to_lowercase().as_str() {
+                    // 文本文件
                     "txt" => Some("text/plain"),
-                    "html" => Some("text/html"),
+                    "html" | "htm" => Some("text/html"),
                     "css" => Some("text/css"),
                     "js" => Some("application/javascript"),
                     "json" => Some("application/json"),
                     "xml" => Some("application/xml"),
+                    "csv" => Some("text/csv"),
+                    "md" => Some("text/markdown"),
+                    
+                    // 图片格式
                     "jpg" | "jpeg" => Some("image/jpeg"),
                     "png" => Some("image/png"),
                     "gif" => Some("image/gif"),
+                    "webp" => Some("image/webp"),
+                    "bmp" => Some("image/bmp"),
+                    "tiff" | "tif" => Some("image/tiff"),
+                    "svg" => Some("image/svg+xml"),
+                    "ico" => Some("image/x-icon"),
+                    "heic" => Some("image/heic"),
+                    "heif" => Some("image/heif"),
+                    "avif" => Some("image/avif"),
+                    "jxl" => Some("image/jxl"),
+                    
+                    // 视频格式
+                    "mp4" => Some("video/mp4"),
+                    "avi" => Some("video/x-msvideo"),
+                    "mov" => Some("video/quicktime"),
+                    "wmv" => Some("video/x-ms-wmv"),
+                    "flv" => Some("video/x-flv"),
+                    "webm" => Some("video/webm"),
+                    "mkv" => Some("video/x-matroska"),
+                    "m4v" => Some("video/x-m4v"),
+                    "3gp" => Some("video/3gpp"),
+                    "3g2" => Some("video/3gpp2"),
+                    "ts" => Some("video/mp2t"),
+                    "mts" => Some("video/mp2t"),
+                    "m2ts" => Some("video/mp2t"),
+                    "ogv" => Some("video/ogg"),
+                    
+                    // 音频格式
+                    "mp3" => Some("audio/mpeg"),
+                    "wav" => Some("audio/wav"),
+                    "flac" => Some("audio/flac"),
+                    "aac" => Some("audio/aac"),
+                    "ogg" => Some("audio/ogg"),
+                    "wma" => Some("audio/x-ms-wma"),
+                    "m4a" => Some("audio/mp4"),
+                    "opus" => Some("audio/opus"),
+                    
+                    // 文档格式
                     "pdf" => Some("application/pdf"),
+                    "doc" => Some("application/msword"),
+                    "docx" => Some("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+                    "xls" => Some("application/vnd.ms-excel"),
+                    "xlsx" => Some("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+                    "ppt" => Some("application/vnd.ms-powerpoint"),
+                    "pptx" => Some("application/vnd.openxmlformats-officedocument.presentationml.presentation"),
+                    "rtf" => Some("application/rtf"),
+                    
+                    // 压缩文件
+                    "zip" => Some("application/zip"),
+                    "rar" => Some("application/vnd.rar"),
+                    "7z" => Some("application/x-7z-compressed"),
+                    "tar" => Some("application/x-tar"),
+                    "gz" => Some("application/gzip"),
+                    "bz2" => Some("application/x-bzip2"),
+                    
+                    // 其他常见格式
+                    "bin" => Some("application/octet-stream"),
+                    "exe" => Some("application/octet-stream"),
+                    "dmg" => Some("application/x-apple-diskimage"),
+                    "iso" => Some("application/x-iso9660-image"),
+                    
                     _ => None,
                 })
         });
