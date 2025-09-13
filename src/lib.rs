@@ -40,6 +40,7 @@ pub mod client;
 pub mod config;
 pub mod error;
 pub mod object;
+pub mod sts;
 
 // 重新导出主要类型
 pub use auth::Auth;
@@ -48,6 +49,7 @@ pub use client::CosClient;
 pub use config::Config;
 pub use error::{CosError, Result};
 pub use object::{ObjectClient, PutObjectResponse, GetObjectResponse, DeleteObjectResponse, HeadObjectResponse};
+pub use sts::{StsClient, TemporaryCredentials, Policy, Statement, GetCredentialsRequest};
 
 /// SDK 版本
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -6,7 +6,6 @@ use crate::error::{CosError, Result};
 use chrono::{DateTime, Utc};
 use hmac::{Hmac, Mac};
 use sha1::{Digest, Sha1};
-use sha2::Sha256;
 use std::collections::HashMap;
 use url::Url;
 

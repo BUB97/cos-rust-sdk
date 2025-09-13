@@ -4,7 +4,6 @@
 
 use crate::client::CosClient;
 use crate::error::{CosError, Result};
-use reqwest::Response;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
@@ -30,7 +29,7 @@ impl ObjectClient {
         data: Vec<u8>,
         content_type: Option<&str>,
     ) -> Result<PutObjectResponse> {
-        let mut params = HashMap::new();
+        let params = HashMap::new();
         
         let mut headers = HashMap::new();
         if let Some(ct) = content_type {

@@ -4,7 +4,7 @@
 
 use crate::client::CosClient;
 use crate::error::{CosError, Result};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::collections::HashMap;
 
 /// 存储桶操作客户端
@@ -21,7 +21,7 @@ impl BucketClient {
 
     /// 创建存储桶
     pub async fn create_bucket(&self, acl: Option<BucketAcl>) -> Result<()> {
-        let mut params = HashMap::new();
+        let params = HashMap::new();
         let mut headers = HashMap::new();
         
         if let Some(acl) = acl {

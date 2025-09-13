@@ -14,8 +14,7 @@
 //! - COS_BUCKET: 存储桶名称（包含 APPID）
 
 use cos_rust_sdk::{
-    Config, CosClient, ObjectClient, BucketClient,
-    BucketAcl, ListObjectsV2Options, CosError
+    Config, CosClient, ObjectClient, BucketClient, ListObjectsV2Options
 };
 use std::env;
 use std::time::Duration;
