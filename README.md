@@ -162,6 +162,146 @@ let config = Config::new(secret_id, secret_key, region, bucket)
 - `ap-singapore` - 新加坡
 - `ap-hongkong` - 香港
 
+## STS 临时凭证
+
+### 基本用法
+
+```rust
+use cos_rust_sdk::sts::{StsClient, GetCredentialsRequest, Policy};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // 创建 STS 客户端
+    let sts_client = StsClient::new(
+        "your-secret-id".to_string(),
+        "your-secret-key".to_string(),
+        "ap-beijing".to_string(),
+    );
+
+    // 创建策略 - 允许读写 media/ 前缀的文件
+    let policy = Policy::allow_read_write("your-bucket-1234567890", Some("media/"));
+
+    // 构建请求
+    let request = GetCredentialsRequest {
+        name: Some("temp-credentials".to_string()),
+        policy,
+        duration_seconds: Some(3600), // 1小时有效期
+    };
+
+    // 获取临时凭证
+    let credentials = sts_client.get_credentials(request).await?;
+    
+    println!("临时 SecretId: {}", credentials.tmp_secret_id);
+    println!("临时 SecretKey: {}", credentials.tmp_secret_key);
+    println!("SessionToken: {}", credentials.token);
+    
+    Ok(())
+}
+```
+
+### Policy 策略配置
+
+#### 预定义策略方法
+
+```rust
+use cos_rust_sdk::sts::Policy;
+
+// 1. 仅允许上传文件到指定前缀
+let upload_policy = Policy::allow_put_object("bucket-1234567890", Some("uploads/"));
+
+// 2. 仅允许下载指定前缀的文件
+let download_policy = Policy::allow_get_object("bucket-1234567890", Some("public/"));
+
+// 3. 仅允许删除指定前缀的文件
+let delete_policy = Policy::allow_delete_object("bucket-1234567890", Some("temp/"));
+
+// 4. 允许读写操作（上传、下载、删除）到指定前缀
+let readwrite_policy = Policy::allow_read_write("bucket-1234567890", Some("media/"));
+
+// 5. 允许读写整个存储桶（不限制前缀）
+let full_policy = Policy::allow_read_write("bucket-1234567890", None);
+```
+
+#### 自定义策略
+
+```rust
+use cos_rust_sdk::sts::{Policy, Statement};
+use std::collections::HashMap;
+
+// 创建自定义策略
+let custom_policy = Policy::new()
+    .add_statement(Statement {
+        effect: "allow".to_string(),
+        action: vec![
+            "name/cos:PutObject".to_string(),
+            "name/cos:GetObject".to_string(),
+        ],
+        resource: vec![
+            "qcs::cos:*:uid/1234567890:prefix//1234567890/my-bucket/images/*".to_string()
+        ],
+        condition: None,
+    });
+```
+
+#### 策略使用场景
+
+| 策略方法 | 适用场景 | 权限范围 |
+|---------|---------|----------|
+| `allow_put_object` | 前端文件上传 | 仅上传权限 |
+| `allow_get_object` | 公共资源下载 | 仅下载权限 |
+| `allow_delete_object` | 临时文件清理 | 仅删除权限 |
+| `allow_read_write` | 完整文件管理 | 上传、下载、删除 |
+
+### 完整的 STS 示例
+
+```rust
+use cos_rust_sdk::sts::{StsClient, GetCredentialsRequest, Policy};
+use cos_rust_sdk::{Config, CosClient, ObjectClient};
+use std::time::Duration;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // 1. 获取临时凭证
+    let sts_client = StsClient::new(
+        "your-secret-id".to_string(),
+        "your-secret-key".to_string(),
+        "ap-beijing".to_string(),
+    );
+
+    let policy = Policy::allow_put_object("bucket-1234567890", Some("uploads/"));
+    let request = GetCredentialsRequest {
+        name: Some("upload-credentials".to_string()),
+        policy,
+        duration_seconds: Some(1800), // 30分钟
+    };
+
+    let temp_credentials = sts_client.get_credentials(request).await?;
+
+    // 2. 使用临时凭证创建 COS 客户端
+    let config = Config::new(
+        &temp_credentials.tmp_secret_id,
+        &temp_credentials.tmp_secret_key,
+        "ap-beijing",
+        "bucket-1234567890"
+    )
+    .with_session_token(&temp_credentials.token)
+    .with_timeout(Duration::from_secs(30));
+
+    let cos_client = CosClient::new(config)?;
+    let object_client = ObjectClient::new(cos_client);
+
+    // 3. 使用临时凭证上传文件
+    let data = b"Hello from temporary credentials!";
+    let response = object_client
+        .put_object("uploads/temp-file.txt", data.to_vec(), Some("text/plain"))
+        .await?;
+    
+    println!("文件上传成功，ETag: {}", response.etag);
+    
+    Ok(())
+}
+```
+
 ## 错误处理
 
 ```rust

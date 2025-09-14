@@ -67,7 +67,7 @@ struct StsError {
 }
 
 /// 权限策略
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Policy {
     /// 策略语法版本
     pub version: String,
@@ -76,7 +76,7 @@ pub struct Policy {
 }
 
 /// 策略声明
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Statement {
     /// 效果：allow 或 deny
     pub effect: String,
@@ -345,6 +345,32 @@ impl Policy {
             action: vec![
                 "name/cos:GetObject".to_string(),
                 "name/cos:HeadObject".to_string(),
+            ],
+            resource: vec![resource],
+            condition: None,
+        })
+    }
+    
+    /// 创建允许删除对象的策略
+    pub fn allow_delete_object(bucket: &str, prefix: Option<&str>) -> Self {
+        // 从bucket名称中提取appid (格式: bucket-appid)
+        let parts: Vec<&str> = bucket.rsplitn(2, '-').collect();
+        let (bucket_name, appid) = if parts.len() == 2 {
+            (parts[1], parts[0])
+        } else {
+            (bucket, "*")
+        };
+        
+        let resource = if let Some(prefix) = prefix {
+            format!("qcs::cos:*:uid/{}:prefix//{}/{}/{}*", appid, appid, bucket_name, prefix)
+        } else {
+            format!("qcs::cos:*:uid/{}:prefix//{}/{}/*", appid, appid, bucket_name)
+        };
+        
+        Self::new().add_statement(Statement {
+            effect: "allow".to_string(),
+            action: vec![
+                "name/cos:DeleteObject".to_string(),
             ],
             resource: vec![resource],
             condition: None,
