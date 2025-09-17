@@ -1,10 +1,11 @@
-//! 腾讯云 STS (Security Token Service) 临时密钥模块
+//! # STS (Security Token Service) 模块
 //!
-//! 本模块提供获取临时密钥的功能，主要用于前端应用的临时授权场景。
-//! 临时密钥包含 TmpSecretId、TmpSecretKey 和 Token 三个字段。
+//! 提供临时访问凭证的获取功能，用于安全地访问腾讯云 COS 资源。
+//! 
+//! STS 允许您为第三方用户或应用程序提供临时的、有限权限的访问凭证，
+//! 而无需暴露您的长期密钥。
 //!
-//! 基于腾讯云官方STS SDK实现，使用腾讯云SDK的签名方法
-//! 参考文档：https://cloud.tencent.com/document/product/436/14048
+//! 参考文档：<https://cloud.tencent.com/document/product/436/14048>
 
 use crate::error::CosError;
 use reqwest::Client;
